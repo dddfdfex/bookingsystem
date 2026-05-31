@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حجز 2027 | بوابة تسجيل الطلاب</title>
+<!-- استدعاء خطوط Playpen Sans و Cairo لتوافق مثالي -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playpen+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- مكتبات Firebase المعرفية بالكونفج -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<!-- مكتبة إنشاء الـ QR Code لبطاقة الحضور -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+:root {
+  --bg-dark: #020203;       
+  --card-bg: #090a0f;       
+  --border-color: #161923;  
+  --text-main: #f8fafc;     
+  --text-muted: #94a3b8;    
+  --accent-blue: #3b82f6;   
+  --accent-glow: rgba(59, 130, 246, 0.15);
+  --success-green: #10b981; 
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Playpen Sans', 'Cairo', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ---------------- شاشة الانترو ---------------- */
+#introOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-dark);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#introOverlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.intro-logo {
+  width: 120px;
+  margin-bottom: 20px;
+  animation: pulse 1.5s infinite alternate;
+}
+
+.loading-bar {
+  width: 200px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-progress {
+  width: 0%;
+  height: 100%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 10px var(--accent-blue);
+  animation: load 2s forwards ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 20px var(--accent-glow); }
+}
+@keyframes load {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, transparent 70%);
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.booking-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px; 
+  padding: 35px 30px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------- شريط التقدم (العداد) ---------------- */
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  position: relative;
+  padding: 0 15px;
+}
+
+.progress-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 25px;
+  right: 25px;
+  height: 2px;
+  background: var(--border-color);
+  z-index: 0;
+  transform: translateY(-50%);
+}
+
+.progress-step {
+  width: 35px;
+  height: 35px;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-muted);
+  z-index: 1;
+  transition: all 0.4s ease;
+}
+
+.progress-step.active {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  box-shadow: 0 0 15px var(--accent-glow);
+  transform: scale(1.1);
+}
+
+.progress-step.completed {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+/* ---------------- الهيدر والشعارات ---------------- */
+.brand-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.logos-meta-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.brand-img {
+  width: 90px; 
+  height: 90px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+.brand-img:hover { transform: scale(1.08); }
+
+.collab-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 110px;
+  line-height: 1.5;
+  font-weight: 600;
+  text-align: center;
+}
+
+.system-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+/* ---------------- ستايل البانر ---------------- */
+.card-banner-img {
+  width: 100%;
+  height: auto;
+  max-height: 280px; 
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+.welcome-banner {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.welcome-banner strong {
+  color: var(--accent-blue);
+}
+
+/* نظام الخطوات التدريجي */
+.form-step {
+  display: none;
+}
+.form-step.active {
+  display: block;
+  animation: slideFade 0.4s ease-out forwards;
+}
+
+@keyframes slideFade {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* تصميم حقول الإدخال والاختيارات */
+.field-wrapper {
+  margin-bottom: 20px;
+  text-align: right;
+}
+
+.field-wrapper label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  background: #020203;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.input-field:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+select.input-field {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 14px center;
+  background-size: 16px;
+}
+select.input-field option {
+  background: var(--card-bg);
+  color: var(--text-main);
+}
+
+/* شبكة اختيار المواد */
+.subjects-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.subject-item {
+  background: #040507;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 25px 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.subject-item:hover {
+  border-color: #262b3d;
+  transform: translateY(-3px);
+}
+
+.subject-item.active-choice {
+  border-color: var(--accent-blue);
+  background: rgba(59, 130, 246, 0.04);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+}
+
+.sub-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: var(--accent-blue);
+}
+
+.sub-title {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-main);
+}
+
+/* أزرار التحكم */
+.action-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-submit {
+  background: var(--accent-blue);
+  color: #ffffff;
+}
+.btn-submit:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+.btn-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-back {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  margin-top: 12px;
+}
+.btn-back:hover {
+  color: var(--text-main);
+  border-color: #262b3d;
+}
+
+/* واجهة كرت النجاح النهائي واستخراج الكود */
+.success-layout {
+  text-align: center;
+}
+
+.done-mark {
+  font-size: 50px;
+  color: var(--success-green);
+  margin-bottom: 12px;
+  animation: scaleUp 0.5s ease-out forwards;
+}
+
+@keyframes scaleUp {
+  0% { transform: scale(0); }
+  80% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.gift-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-green);
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.qr-box-container {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 14px;
+  display: inline-block;
+  margin: 15px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.download-qr-btn {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+}
+.download-qr-btn:hover {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.student-code-display {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  letter-spacing: 2px;
+  margin: 5px 0 15px;
+}
+
+.review-info-box {
+  background: #05060a;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 15px;
+  text-align: right;
+}
+
+.review-info-box p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.review-info-box p i {
+  color: var(--accent-blue);
+  margin-left: 8px;
+  width: 16px;
+}
+.review-info-box p:last-child { margin-bottom: 0; }
+
+.spinner-box {
+  display: none;
+  text-align: center;
+  color: var(--accent-blue);
+  font-size: 24px;
+  margin: 20px 0;
+}
+.fa-spin { animation: fa-spin 1s infinite linear; }
+</style>
+</head>
+<body>
+
+<!-- شاشة الانترو التي ستختفي بعد التحميل -->
+<div id="introOverlay">
+  <img src="logo.png" class="intro-logo" alt="Loading Logo" onerror="this.style.display='none';">
+  <div class="loading-bar">
+    <div class="loading-progress"></div>
+  </div>
+</div>
+
+<div class="booking-card">
+  
+  <!-- العداد المرئي للخطوات -->
+  <div class="progress-container">
+    <div class="progress-step active" id="indicator1">1</div>
+    <div class="progress-step" id="indicator2">2</div>
+    <div class="progress-step" id="indicator3">3</div>
+    <div class="progress-step" id="indicator4"><i class="fa-solid fa-check"></i></div>
+  </div>
+
+  <!-- الهيدر الموحد بالشعارين والبانر الجديد -->
+  <div class="brand-header">
+    <div class="logos-meta-wrapper">
+      <img src="logo.png" class="brand-img" alt="Logo" onerror="this.style.display='none';">
+      <div class="collab-note">النظام يعمل بالتعاون مع</div>
+      <img src="partner_logo.png" class="brand-img" alt="Partner Logo" onerror="this.style.display='none';">
+    </div>
+    
+    <div class="system-title">حجز كارت الحضور الخاص بالعام الجديد 2027</div>
+    
+    <!-- بانر كارت الحضور -->
+    <img src="card_banner.png" alt="ID Card 2027" class="card-banner-img" onerror="this.style.display='none';">
+
+    <div class="welcome-banner" id="welcomeMsg">مرحباً بك في نظام التسجيل الإلكتروني الموحد</div>
+  </div>
+
+  <!-- خطوة 1: اختيار المادة الدراسية -->
+  <div id="step1" class="form-step active">
+    <div style="text-align: center; margin-bottom: 20px; font-size: 14px; font-weight: 700; color: var(--text-muted);">يرجى اختيار المادة لبدء التسجيل:</div>
+    <div class="subjects-layout">
+      <div class="subject-item" onclick="pickSubject('كيمياء', this)">
+        <div class="sub-icon"><i class="fa-solid fa-flask-vial"></i></div>
+        <div class="sub-title">كيمياء</div>
+      </div>
+      <div class="subject-item" onclick="pickSubject('علوم متكاملة', this)">
+        <div class="sub-icon"><i class="fa-solid fa-dna"></i></div>
+        <div class="sub-title">علوم متكاملة</div>
+      </div>
+    </div>
+    <button class="action-btn btn-submit" id="nextBtn1" onclick="changeStep(2)" disabled>التالي <i class="fa-solid fa-chevron-left"></i></button>
+  </div>
+
+  <!-- خطوة 2: معلومات الطالب الشخصية -->
+  <div id="step2" class="form-step">
+    <div class="field-wrapper">
+      <label>اسم الطالب ثلاثي أو رباعي</label>
+      <input type="text" id="studentName" class="input-field" placeholder="اكتب اسمك بالكامل">
+    </div>
+    <div class="field-wrapper">
+      <label>المرحلة الدراسية</label>
+      <select id="studentGrade" class="input-field">
+        <option value="" disabled selected>اختر المرحلة الدراسية</option>
+        <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+        <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+        <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+      </select>
+    </div>
+    <div class="field-wrapper">
+      <label>رقم هاتف الطالب</label>
+      <input type="tel" id="studentPhone" class="input-field" placeholder="01XXXXXXXXX">
+    </div>
+    <div class="field-wrapper">
+      <label>رقم هاتف ولي الأمر</label>
+      <input type="tel" id="parentPhone" class="input-field" placeholder="01XXXXXXXXX">
+    </div>
+    
+    <button class="action-btn btn-submit" id="btnStep2" onclick="verifyStep2Data()">التالي <i class="fa-solid fa-chevron-left"></i></button>
+    <button class="action-btn btn-back" onclick="changeStep(1)"><i class="fa-solid fa-chevron-right"></i> السابق</button>
+  </div>
+
+  <!-- خطوة 3: اختيار المجموعة المتاحة بالكونفج -->
+  <div id="step3" class="form-step">
+    <div class="field-wrapper">
+      <label>المجموعات المتاحة حالياً</label>
+      <select id="groupSelect" class="input-field">
+        <option value="" disabled selected>جاري جلب المجموعات النشطة...</option>
+      </select>
+    </div>
+    <div id="loadingSpinner" class="spinner-box"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+    
+    <button class="action-btn btn-submit" id="submitBtn" onclick="executeRegistration()">تأكيد الحجز واستخراج الكود <i class="fa-solid fa-qrcode"></i></button>
+    <button class="action-btn btn-back" onclick="changeStep(2)"><i class="fa-solid fa-chevron-right"></i> السابق</button>
+  </div>
+
+  <!-- خطوة 4: شاشة النجاح الكاملة والباركود القابل للتحميل -->
+  <div id="step4" class="form-step success-layout">
+    <div class="done-mark"><i class="fa-solid fa-circle-check"></i></div>
+    
+    <div class="gift-badge"><i class="fa-solid fa-gift"></i> تهانينا! أول حصة لك مجاناً بالكامل</div>
+    
+    <div class="system-title" style="font-size: 22px;">تم تسجيل طلبك بنجاح</div>
+    <div style="color: var(--text-muted); margin-top: 4px; font-size: 14px; font-weight: 600;" id="confirmationText"></div>
+    
+    <!-- مربع الباركود -->
+    <div class="qr-box-container">
+      <div id="studentQrCode"></div>
+    </div>
+    <br>
+    <!-- زر تحميل الكود كصورة مباشرة لجهاز الطالب -->
+    <button class="download-qr-btn" onclick="downloadStudentQR()"><i class="fa-solid fa-download"></i> تحميل الباركود كصورة</button>
+    
+    <div style="font-size: 14px; font-weight: 700; color: var(--text-muted);">كود الحضور الموحد الخاص بك:</div>
+    <div class="student-code-display" id="studentUidDisplay"></div>
+    
+    <!-- صندوق المعلومات والتعليمات المطلوب بالتفصيل -->
+    <div class="review-info-box">
+      <p><i class="fa-solid fa-clock"></i> طلبك حالياً <strong>قيد المراجعة</strong> وسيتم قبوله في غضون <strong>24 ساعة</strong>.</p>
+      <p><i class="fa-solid fa-comments"></i> سيتم التواصل معك قريباً بواسطة <strong>فريق أمنية سعيد</strong> لتحديد موعد ومكان أول حصة.</p>
+      <p><i class="fa-solid fa-id-badge"></i> يرجى <strong>الاحتفاظ بالكود</strong> (الباركود) لحين استلام الكارت الفعلي في أول حصة.</p>
+      <p><i class="fa-solid fa-circle-info"></i> سيتم إبلاغك <strong>بتكلفة كارت الحضور الرمزية</strong> خلال الحصة الأولى.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// إخفاء الانترو بسلاسة بعد تحميل الصفحة
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('introOverlay').classList.add('hidden');
+  }, 2200);
+});
+
+// إعدادات الكونفج الحالية لـ Firebase التابعة لك
+const firebaseConfig = {
+  apiKey: "AIzaSyD971ixQUVYZxTtjAkl7U8bC-ZbsZgCUX4",
+  authDomain: "brothers-studio-attendance.firebaseapp.com",
+  databaseURL: "https://brothers-studio-attendance-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "brothers-studio-attendance",
+  storageBucket: "brothers-studio-attendance.firebasestorage.app",
+  messagingSenderId: "149223396857",
+  appId: "1:149223396857:web:2d8629ef8f76581e35d928"
+};
+
+// تهيئة المشروع
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+let studentForm = {
+  subject: '',
+  name: '',
+  grade: '',
+  sPhone: '',
+  pPhone: '',
+  groupKey: '',
+  groupTitle: ''
+};
+
+// عند تحميل الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+  database.ref('app_configurations/professor_identity').once('value', snap => {
+    if(snap.exists() && snap.val()) {
+      document.getElementById('welcomeMsg').innerHTML = `مرحباً بك في نظام الحجز والمجموعات مع الأستاذ <strong>${snap.val()}</strong>`;
+    }
+  });
+
+  database.ref('groups').once('value', snap => {
+    const groupSelect = document.getElementById('groupSelect');
+    const groupsData = snap.val() || {};
+    groupSelect.innerHTML = '<option value="" disabled selected>اختر المجموعة والموعد المناسب لك</option>';
+    
+    let hasGroups = false;
+    for(let key in groupsData) {
+      let g = groupsData[key];
+      if(g && g.title) {
+        hasGroups = true;
+        groupSelect.innerHTML += `<option value="${key}" data-title="${g.title}">${g.title}</option>`;
+      }
+    }
+    
+    if(!hasGroups) {
+      groupSelect.innerHTML = '<option value="default_group" data-title="المجموعة العامة لعام 2027">المجموعة العامة لعام 2027 (سيتم التحديد لاحقاً)</option>';
+    }
+  });
+});
+
+// دالة تحديث الخطوات والعداد المرئي
+function changeStep(stepNumber) {
+  document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
+  document.getElementById('step' + stepNumber).classList.add('active');
+
+  for (let i = 1; i <= 4; i++) {
+    let indicator = document.getElementById('indicator' + i);
+    if (i < stepNumber) {
+      indicator.className = 'progress-step completed';
+      if (i !== 4) indicator.innerHTML = '<i class="fa-solid fa-check"></i>';
+    } else if (i === stepNumber) {
+      indicator.className = 'progress-step active';
+      if (i !== 4) indicator.innerText = i;
+    } else {
+      indicator.className = 'progress-step';
+      if (i !== 4) indicator.innerText = i;
+    }
+  }
+}
+
+function pickSubject(subjectName, element) {
+  studentForm.subject = subjectName;
+  document.querySelectorAll('.subject-item').forEach(item => item.classList.remove('active-choice'));
+  element.classList.add('active-choice');
+  document.getElementById('nextBtn1').disabled = false;
+}
+
+// تعديل الدالة لتعمل بشكل غير متزامن وتفحص التكرار في قاعدة البيانات
+async function verifyStep2Data() {
+  studentForm.name = document.getElementById('studentName').value.trim();
+  studentForm.grade = document.getElementById('studentGrade').value;
+  studentForm.sPhone = document.getElementById('studentPhone').value.trim();
+  studentForm.pPhone = document.getElementById('parentPhone').value.trim();
+
+  if (studentForm.name.length < 6) {
+    alert("برجاء إدخال اسم الطالب الثلاثي كاملاً باللغة العربية.");
+    return;
+  }
+  if (!studentForm.grade) {
+    alert("برجاء تحديد المرحلة الدراسية الخاصة بك.");
+    return;
+  }
+  if (studentForm.sPhone.length < 10 || studentForm.pPhone.length < 10) {
+    alert("برجاء التأكد من كتابة أرقام الهواتف الخلوية بشكل صحيح.");
+    return;
+  }
+
+  const btn = document.getElementById('btnStep2');
+  const originalText = btn.innerHTML;
+  
+  // تغيير حالة الزر أثناء التحقق
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحقق من البيانات...';
+  btn.disabled = true;
+
+  try {
+    const directorySnap = await database.ref('students_directory').once('value');
+    if (directorySnap.exists()) {
+      let isDuplicate = false;
+      let errorMsg = "";
+
+      directorySnap.forEach(child => {
+        let studentData = child.val();
+        if (studentData.name === studentForm.name) {
+          isDuplicate = true;
+          errorMsg = "هذا الاسم مسجل لدينا بالفعل، يرجى التواصل مع الإدارة إذا واجهت مشكلة.";
+        } else if (studentData.student_phone === studentForm.sPhone) {
+          isDuplicate = true;
+          errorMsg = "رقم هاتف الطالب تم استخدامه في تسجيل مسبق.";
+        } else if (studentData.parent_phone === studentForm.pPhone) {
+          isDuplicate = true;
+          errorMsg = "رقم هاتف ولي الأمر تم استخدامه في تسجيل مسبق.";
+        }
+      });
+
+      if (isDuplicate) {
+        alert(errorMsg);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        return; // إيقاف التنفيذ ومنع الانتقال للخطوة 3
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء محاولة الاتصال بقاعدة البيانات للتحقق. يرجى المحاولة مرة أخرى.");
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    return;
+  }
+
+  // إذا كانت البيانات غير متكررة، ارجع الزر لوضعه الطبيعي وانتقل للخطوة 3
+  btn.innerHTML = originalText;
+  btn.disabled = false;
+  changeStep(3);
+}
+
+async function executeRegistration() {
+  const selectEl = document.getElementById('groupSelect');
+  if(!selectEl.value) {
+    alert("برجاء اختيار المجموعة التي ترغب بالانضمام إليها لحضور الحصص.");
+    return;
+  }
+  
+  studentForm.groupKey = selectEl.value;
+  studentForm.groupTitle = selectEl.options[selectEl.selectedIndex].getAttribute('data-title');
+
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('loadingSpinner').style.display = 'block';
+
+  try {
+    let calculatedUid = 27001;
+    const directorySnap = await database.ref('students_directory').once('value');
+    
+    if(directorySnap.exists()) {
+      let maxCurrentUid = 0;
+      directorySnap.forEach(child => {
+        let currentUidInt = parseInt(child.val().uid);
+        if(!isNaN(currentUidInt) && currentUidInt > maxCurrentUid) {
+          maxCurrentUid = currentUidInt;
+        }
+      });
+      if(maxCurrentUid >= 27000) {
+        calculatedUid = maxCurrentUid + 1;
+      }
+    }
+
+    const finalUidString = calculatedUid.toString();
+
+    const studentPayload = {
+      uid: finalUidString,
+      name: studentForm.name,
+      grade: studentForm.grade,
+      student_phone: studentForm.sPhone,
+      parent_phone: studentForm.pPhone,
+      subject_preference: studentForm.subject, 
+      group_reference: studentForm.groupKey,    
+      group_title: studentForm.groupTitle,
+      status: 'pending',                        
+      wallet_balance: 1,                        
+      registration_date: new Date().toISOString()
+    };
+
+    await database.ref('students_directory').push(studentPayload);
+
+    document.getElementById('loadingSpinner').style.display = 'none';
+    document.getElementById('confirmationText').innerHTML = `أهلاً بك يا <strong>${studentForm.name.split(' ')[0]}</strong>، تم إدراجك في مادة <strong>${studentForm.subject}</strong>.`;
+    document.getElementById('studentUidDisplay').innerText = finalUidString;
+
+    new QRCode(document.getElementById("studentQrCode"), {
+      text: finalUidString,
+      width: 150,
+      height: 150,
+      colorDark : "#020203",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+    });
+
+    changeStep(4);
+
+  } catch (error) {
+    console.error(error);
+    alert("عذراً، واجهنا مشكلة أثناء إتمام اتصال الحجز بقاعدة البيانات، يرجى المحاولة مرة أخرى.");
+    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('loadingSpinner').style.display = 'none';
+  }
+}
+
+function downloadStudentQR() {
+  const qrContainer = document.getElementById('studentQrCode');
+  const canvas = qrContainer.querySelector('canvas');
+  const img = qrContainer.querySelector('img');
+  let dataUrl = '';
+  
+  if (canvas) {
+    dataUrl = canvas.toDataURL('image/png');
+  } else if (img) {
+    dataUrl = img.src;
+  }
+  
+  if (dataUrl) {
+    const downloadLink = document.createElement('a');
+    const studentUid = document.getElementById('studentUidDisplay').innerText || '2027';
+    downloadLink.href = dataUrl;
+    downloadLink.download = `كود_حضور_طالب_${studentUid}.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  } else {
+    alert("يرجى الانتظار لحين اكتمال إنشاء الكود أو أخذ لقطة شاشة يدوياً.");
+  }
+}
+</script>
+</body>
+</html>
