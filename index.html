@@ -478,6 +478,424 @@ select.input-field option {
   margin: 20px 0;
 }
 .fa-spin { animation: fa-spin 1s infinite linear; }
+
+/* ===== كارتات المجموعات الجديدة ===== */
+.groups-section {
+  margin-bottom: 18px;
+}
+
+.grade-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.03));
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.grade-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grade-section-count {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(59,130,246,0.15);
+  color: var(--accent-blue);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(59,130,246,0.25);
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.group-card {
+  background: #040507;
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  text-align: right;
+}
+
+.group-card:hover {
+  border-color: #2a3050;
+  transform: translateY(-2px);
+  background: #060810;
+}
+
+.group-card.selected {
+  border-color: var(--accent-blue);
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 4px 16px rgba(59,130,246,0.12);
+}
+
+.group-card.disabled-card {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.group-card-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  transition: all 0.2s;
+  background: transparent;
+}
+
+.group-card.selected .group-card-check {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+}
+
+.group-card-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.group-card-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.group-card-meta span {
+  display: block;
+}
+
+.selection-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #05060a;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.counter-label { color: var(--text-muted); }
+.counter-value { 
+  color: var(--accent-blue);
+  background: rgba(59,130,246,0.1);
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+.counter-value.full {
+  color: #10b981;
+  background: rgba(16,185,129,0.1);
+}
+
+.selected-groups-preview {
+  margin-bottom: 16px;
+  display: none;
+}
+.selected-groups-preview.visible { display: block; }
+
+.selected-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(59,130,246,0.1);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin: 3px;
+}
+
+.wallet-info-box {
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #10b981;
+}
+.wallet-info-box i { font-size: 16px; flex-shrink: 0; }
+
+.no-groups-msg {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 30px 0;
+}
+
+/* أقسام المجموعات قابلة للطي */
+.grade-groups-body {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+/* حاوية المجموعات مع scroll لو امتلأت */
+#groupsContainer {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-left: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+#groupsContainer::-webkit-scrollbar {
+  width: 4px;
+}
+#groupsContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+#groupsContainer::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* ===== كارت مجموعة مقيدة بالربط ===== */
+.group-card.bundle-disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.6);
+}
+
+.bundle-hint-box {
+  display: none;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 10px;
+  padding: 9px 13px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f59e0b;
+  align-items: center;
+  gap: 8px;
+}
+.bundle-hint-box.visible {
+  display: flex;
+}
+
+/* ===== كارت مجموعة ممتلئة ===== */
+.group-card.full-card {
+  cursor: not-allowed;
+  border-color: rgba(239,68,68,0.25) !important;
+  background: rgba(239,68,68,0.03) !important;
+  pointer-events: none;
+}
+
+.full-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.group-card.full-card .group-card-title {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ===== شريط الامتلاء ===== */
+.capacity-bar-wrap {
+  margin-top: 8px;
+}
+
+.capacity-bar-track {
+  width: 100%;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.capacity-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.capacity-bar-fill.low    { background: #10b981; }
+.capacity-bar-fill.mid    { background: #f59e0b; }
+.capacity-bar-fill.high   { background: #ef4444; }
+
+.capacity-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.capacity-label.warn  { color: #f59e0b; }
+.capacity-label.full  { color: #ef4444; }
+
+/* ===== نظام طلب التبديل ===== */
+.page-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.page-tab {
+  flex: 1;
+  padding: 11px 10px;
+  background: #040507;
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.page-tab.active {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: rgba(59,130,246,0.06);
+}
+.page-section { display: none; }
+.page-section.active { display: block; animation: slideFade 0.35s ease-out forwards; }
+
+.swap-info-box {
+  background: rgba(59,130,246,0.05);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  line-height: 1.8;
+}
+.swap-info-box i { color: var(--accent-blue); margin-left: 6px; }
+
+.swap-result-box {
+  display: none;
+  background: #040507;
+  border: 1.5px solid var(--border-color);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+  text-align: right;
+}
+.swap-result-box.visible { display: block; animation: slideFade 0.3s ease; }
+.swap-result-name { font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+.swap-result-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; line-height: 1.9; }
+.swap-result-meta span { color: var(--accent-blue); }
+
+.swap-ticket {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(16,185,129,0.05));
+  border: 1.5px solid rgba(59,130,246,0.25);
+  border-radius: 16px;
+  padding: 22px 18px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.swap-ticket-num {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  font-family: 'Cairo', sans-serif;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.swap-ticket-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.inquiry-status-box {
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  text-align: center;
+  display: none;
+}
+.inquiry-status-box.visible { display: block; animation: slideFade 0.3s ease; }
+.inquiry-status-box.pending {
+  background: rgba(245,158,11,0.07);
+  border: 1.5px solid rgba(245,158,11,0.25);
+}
+.inquiry-status-box.approved {
+  background: rgba(16,185,129,0.07);
+  border: 1.5px solid rgba(16,185,129,0.25);
+}
+.inquiry-status-box.rejected {
+  background: rgba(239,68,68,0.07);
+  border: 1.5px solid rgba(239,68,68,0.25);
+}
+.inquiry-status-icon { font-size: 30px; margin-bottom: 8px; }
+.inquiry-status-box.pending .inquiry-status-icon { color: #f59e0b; }
+.inquiry-status-box.approved .inquiry-status-icon { color: #10b981; }
+.inquiry-status-box.rejected .inquiry-status-icon { color: #ef4444; }
+.inquiry-status-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.inquiry-status-box.pending .inquiry-status-title { color: #f59e0b; }
+.inquiry-status-box.approved .inquiry-status-title { color: #10b981; }
+.inquiry-status-box.rejected .inquiry-status-title { color: #ef4444; }
+.inquiry-status-detail { font-size: 12.5px; color: var(--text-muted); font-weight: 600; line-height: 1.9; }
+
+.from-to-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.from-to-row .field-wrapper { flex: 1; margin-bottom: 0; }
+.from-to-arrow {
+  color: var(--accent-blue);
+  font-size: 16px;
+  margin-top: 22px;
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -491,6 +909,22 @@ select.input-field option {
 </div>
 
 <div class="booking-card">
+
+  <!-- تابات التنقل -->
+  <div class="page-tabs">
+    <div class="page-tab active" id="tab-booking" onclick="switchTab('booking')">
+      <i class="fa-solid fa-calendar-plus" style="margin-left:5px"></i> حجز جديد
+    </div>
+    <div class="page-tab" id="tab-swap" onclick="switchTab('swap')">
+      <i class="fa-solid fa-right-left" style="margin-left:5px"></i> تبديل مجموعة
+    </div>
+    <div class="page-tab" id="tab-inquiry" onclick="switchTab('inquiry')">
+      <i class="fa-solid fa-magnifying-glass" style="margin-left:5px"></i> استعلام
+    </div>
+  </div>
+
+  <!-- ══ قسم الحجز ══ -->
+  <div class="page-section active" id="section-booking">
   
   <!-- العداد المرئي للخطوات -->
   <div class="progress-container">
@@ -560,17 +994,43 @@ select.input-field option {
     <button class="action-btn btn-back" onclick="changeStep(1)"><i class="fa-solid fa-chevron-right"></i> السابق</button>
   </div>
 
-  <!-- خطوة 3: اختيار المجموعة المتاحة بالكونفج -->
+  <!-- خطوة 3: اختيار المجموعات (بحد أقصى 2) -->
   <div id="step3" class="form-step">
-    <div class="field-wrapper">
-      <label>المجموعات المتاحة حالياً</label>
-      <select id="groupSelect" class="input-field">
-        <option value="" disabled selected>جاري جلب المجموعات النشطة...</option>
-      </select>
+
+    <!-- معلومة الرصيد الترحيبي -->
+    <div class="wallet-info-box">
+      <i class="fa-solid fa-gift"></i>
+      <span>ستحصل على <strong>حصتين مجانيتين</strong> كرصيد ترحيبي فور إتمام التسجيل</span>
     </div>
+
+    <!-- عداد الاختيار -->
+    <div class="selection-counter">
+      <span class="counter-label"><i class="fa-solid fa-layer-group" style="margin-left:5px;color:var(--accent-blue)"></i> المجموعات المختارة</span>
+      <span class="counter-value" id="selectionCounter">0 / 2</span>
+    </div>
+
+    <!-- معاينة الاختيارات -->
+    <div class="selected-groups-preview" id="selectedPreview"></div>
+
+    <!-- تنبيه الربط (يظهر عند الاختيار الأول لو في أزواج محددة) -->
+    <div class="bundle-hint-box" id="bundleHint">
+      <i class="fa-solid fa-link"></i>
+      <span id="bundleHintText">اختر المجموعة الثانية المتوافقة من المجموعات المتاحة</span>
+    </div>
+
+    <!-- حاوية كارتات المجموعات مقسمة بالمراحل -->
+    <div id="groupsLoadingSpinner" class="spinner-box" style="display:block">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      <div style="font-size:13px;margin-top:8px;font-weight:700;color:var(--text-muted)">جاري جلب المجموعات...</div>
+    </div>
+
+    <div id="groupsContainer" class="groups-section"></div>
+
     <div id="loadingSpinner" class="spinner-box"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
-    
-    <button class="action-btn btn-submit" id="submitBtn" onclick="executeRegistration()">تأكيد الحجز واستخراج الكود <i class="fa-solid fa-qrcode"></i></button>
+
+    <button class="action-btn btn-submit" id="submitBtn" onclick="executeRegistration()" disabled>
+      تأكيد الحجز واستخراج الكود <i class="fa-solid fa-qrcode"></i>
+    </button>
     <button class="action-btn btn-back" onclick="changeStep(2)"><i class="fa-solid fa-chevron-right"></i> السابق</button>
   </div>
 
@@ -578,7 +1038,7 @@ select.input-field option {
   <div id="step4" class="form-step success-layout">
     <div class="done-mark"><i class="fa-solid fa-circle-check"></i></div>
     
-    <div class="gift-badge"><i class="fa-solid fa-gift"></i> تهانينا! أول حصة لك مجاناً بالكامل</div>
+    <div class="gift-badge"><i class="fa-solid fa-gift"></i> تهانينا! رصيدك الترحيبي حصتان مجانًا</div>
     
     <div class="system-title" style="font-size: 22px;">تم تسجيل طلبك بنجاح</div>
     <div style="color: var(--text-muted); margin-top: 4px; font-size: 14px; font-weight: 600;" id="confirmationText"></div>
@@ -602,6 +1062,106 @@ select.input-field option {
       <p><i class="fa-solid fa-circle-info"></i> سيتم إبلاغك <strong>بتكلفة كارت الحضور الرمزية</strong> خلال الحصة الأولى.</p>
     </div>
   </div>
+  </div><!-- end section-booking -->
+
+  <!-- ══ قسم طلب التبديل ══ -->
+  <div class="page-section" id="section-swap">
+
+    <div class="swap-info-box">
+      <i class="fa-solid fa-circle-info"></i>
+      يمكنك تقديم طلب تبديل مجموعة واحدة — سيتم مراجعة الطلب من الإدارة وإشعارك بالنتيجة.
+    </div>
+
+    <!-- خطوة 1: إدخال الـ UID -->
+    <div id="swapStep1">
+      <div class="field-wrapper">
+        <label>رقم الطالب (UID)</label>
+        <input type="text" id="swapUid" class="input-field" placeholder="27001">
+      </div>
+      <button class="action-btn btn-submit" onclick="lookupStudentForSwap()">
+        <i class="fa-solid fa-search"></i> بحث عن بياناتي
+      </button>
+    </div>
+
+    <!-- بيانات الطالب بعد البحث -->
+    <div class="swap-result-box" id="swapStudentInfo">
+      <div class="swap-result-name" id="swapStudentName">—</div>
+      <div class="swap-result-meta" id="swapStudentMeta">—</div>
+    </div>
+
+    <!-- خطوة 2: بيانات التبديل -->
+    <div id="swapStep2" style="display:none">
+      <div class="from-to-row">
+        <div class="field-wrapper">
+          <label>من مجموعة</label>
+          <select id="swapFromGroup" class="input-field">
+            <option value="">— اختر —</option>
+          </select>
+        </div>
+        <div class="from-to-arrow"><i class="fa-solid fa-arrow-left"></i></div>
+        <div class="field-wrapper">
+          <label>إلى مجموعة</label>
+          <select id="swapToGroup" class="input-field">
+            <option value="">— اختر —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-wrapper">
+        <label>سبب التبديل</label>
+        <input type="text" id="swapReason" class="input-field" placeholder="اكتب سبب التبديل...">
+      </div>
+
+      <div id="swapLoadingSpinner" class="spinner-box"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+
+      <button class="action-btn btn-submit" id="swapSubmitBtn" onclick="submitSwapRequest()">
+        <i class="fa-solid fa-paper-plane"></i> تقديم طلب التبديل
+      </button>
+      <button class="action-btn btn-back" onclick="resetSwapForm()">
+        <i class="fa-solid fa-rotate-right"></i> إعادة البحث
+      </button>
+    </div>
+
+    <!-- نتيجة إرسال الطلب -->
+    <div id="swapSuccessBox" style="display:none">
+      <div class="swap-ticket">
+        <div class="swap-ticket-label">رقم طلب التبديل</div>
+        <div class="swap-ticket-num" id="swapTicketNum">SW-0001</div>
+        <div class="swap-ticket-label" style="margin-top:6px">احتفظ بهذا الرقم للاستعلام عن حالة طلبك</div>
+      </div>
+      <div class="review-info-box">
+        <p><i class="fa-solid fa-clock"></i> طلبك <strong>قيد المراجعة</strong> من الإدارة.</p>
+        <p><i class="fa-solid fa-bell"></i> ستصلك رسالة واتساب عند <strong>قبول أو رفض</strong> الطلب.</p>
+        <p><i class="fa-solid fa-magnifying-glass"></i> يمكنك <strong>الاستعلام</strong> عن حالة طلبك من تاب "استعلام".</p>
+      </div>
+      <button class="action-btn btn-back" onclick="resetSwapForm()">
+        <i class="fa-solid fa-plus"></i> طلب تبديل جديد
+      </button>
+    </div>
+
+  </div><!-- end section-swap -->
+
+  <!-- ══ قسم الاستعلام ══ -->
+  <div class="page-section" id="section-inquiry">
+
+    <div class="swap-info-box">
+      <i class="fa-solid fa-circle-info"></i>
+      أدخل رقم طلب التبديل للاستعلام عن حالته، أو أدخل الـ UID الخاص بك لعرض كل طلباتك.
+    </div>
+
+    <div class="field-wrapper">
+      <label>رقم طلب التبديل أو الـ UID</label>
+      <input type="text" id="inquiryInput" class="input-field" placeholder="SW-0001 أو 27001">
+    </div>
+    <button class="action-btn btn-submit" onclick="doInquiry()">
+      <i class="fa-solid fa-magnifying-glass"></i> استعلام
+    </button>
+
+    <div id="inquiryLoadingSpinner" class="spinner-box" style="margin-top:16px"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+
+    <div id="inquiryResults" style="margin-top:16px"></div>
+
+  </div><!-- end section-inquiry -->
 
 </div>
 
@@ -634,37 +1194,363 @@ let studentForm = {
   grade: '',
   sPhone: '',
   pPhone: '',
-  groupKey: '',
-  groupTitle: ''
+  selectedGroups: []   // مصفوفة بحد أقصى 2 مجموعات [{key, title, grade}]
+};
+
+// أزواج المجموعات المحملة من Firebase
+let studentBundles = [];
+
+// ========== ترتيب المراحل ==========
+const GRADE_ORDER = [
+  'الصف الأول الثانوي',
+  'الصف الثاني الثانوي',
+  'الصف الثالث الثانوي'
+];
+
+const GRADE_ICONS = {
+  'الصف الأول الثانوي':  'fa-solid fa-1',
+  'الصف الثاني الثانوي': 'fa-solid fa-2',
+  'الصف الثالث الثانوي': 'fa-solid fa-3'
 };
 
 // عند تحميل الصفحة
 window.addEventListener('DOMContentLoaded', () => {
+
+  // جلب اسم الأستاذ
   database.ref('app_configurations/professor_identity').once('value', snap => {
     if(snap.exists() && snap.val()) {
-      document.getElementById('welcomeMsg').innerHTML = `مرحباً بك في نظام الحجز والمجموعات مع الأستاذ <strong>${snap.val()}</strong>`;
+      document.getElementById('welcomeMsg').innerHTML =
+        `مرحباً بك في نظام الحجز والمجموعات مع الأستاذ <strong>${snap.val()}</strong>`;
     }
   });
 
-  database.ref('groups').once('value', snap => {
-    const groupSelect = document.getElementById('groupSelect');
-    const groupsData = snap.val() || {};
-    groupSelect.innerHTML = '<option value="" disabled selected>اختر المجموعة والموعد المناسب لك</option>';
-    
-    let hasGroups = false;
-    for(let key in groupsData) {
-      let g = groupsData[key];
-      if(g && g.title) {
-        hasGroups = true;
-        groupSelect.innerHTML += `<option value="${key}" data-title="${g.title}">${g.title}</option>`;
+  // جلب المجموعات (سيُستدعى لاحقاً عند دخول خطوة 3)
+});
+
+// ========== تحميل وعرض المجموعات (مفلترة بالمادة والمرحلة) ==========
+async function loadAndRenderGroups() {
+  const container = document.getElementById('groupsContainer');
+  const spinner   = document.getElementById('groupsLoadingSpinner');
+
+  container.innerHTML = '';
+  spinner.style.display = 'block';
+
+  const chosenSubject = studentForm.subject;
+  const chosenGrade   = studentForm.grade;
+
+  try {
+    // ===== جلب المجموعات والطلاب والأزواج بالتوازي =====
+    // المجموعات محفوظة في app_configurations/groups (نفس مسار الداشبورد)
+    const [groupsSnap, studentsSnap, bundlesSnap] = await Promise.all([
+      database.ref('app_configurations/groups').once('value'),
+      database.ref('students_directory').once('value'),
+      database.ref('app_configurations/group_bundles').once('value')
+    ]);
+
+    spinner.style.display = 'none';
+
+    const groupsData   = groupsSnap.val()   || {};
+    const studentsData = studentsSnap.val() || {};
+    // تحديث أزواج المجموعات
+    studentBundles = Object.values(bundlesSnap.val() || {});
+
+    // ===== حساب عدد الطلاب الفعلي لكل مجموعة =====
+    const countPerGroup = {};
+    Object.values(studentsData).forEach(s => {
+      if (!s) return;
+      if (s.groups) {
+        // الهيكل الجديد: groups: { group_1: {key, title}, group_2: {...} }
+        Object.values(s.groups).forEach(g => {
+          if (g && g.key) countPerGroup[g.key] = (countPerGroup[g.key] || 0) + 1;
+        });
+      } else if (s.group_reference) {
+        // الهيكل القديم
+        countPerGroup[s.group_reference] = (countPerGroup[s.group_reference] || 0) + 1;
+      }
+    });
+
+    // ===== فلترة المجموعات =====
+    const byGrade   = {};
+    let totalGroups = 0;
+
+    for (let key in groupsData) {
+      const g = groupsData[key];
+      if (!g || !g.title) continue;
+
+      const gSubject = (g.subject || '').trim();
+      if (gSubject && gSubject !== chosenSubject) continue;
+
+      // الداشبورد يحفظ المرحلة في حقل stage
+      const gGrade = (g.stage || g.grade || '').trim();
+      if (gGrade && gGrade !== chosenGrade) continue;
+
+      // الداشبورد يحفظ الحد الأقصى في حقل max
+      const capacity     = parseInt(g.max || g.capacity) || 0;
+      const currentCount = countPerGroup[key]   || 0;
+      const isFull       = capacity > 0 && currentCount >= capacity;
+      const fillPct      = capacity > 0 ? Math.min(100, Math.round(currentCount / capacity * 100)) : 0;
+
+      const sectionKey = gGrade || 'متاح لجميع المراحل';
+      if (!byGrade[sectionKey]) byGrade[sectionKey] = [];
+      // نحفظ normalizedGrade عشان buildGroupCard يستخدمه بشكل موحد
+      byGrade[sectionKey].push({ key, ...g, capacity, currentCount, isFull, fillPct, normalizedGrade: gGrade });
+      totalGroups++;
+    }
+
+    if (totalGroups === 0) {
+      container.innerHTML = `
+        <div class="no-groups-msg">
+          <i class="fa-solid fa-circle-exclamation" style="font-size:28px;margin-bottom:10px;display:block;color:var(--accent-blue)"></i>
+          لا توجد مجموعات متاحة لمادة <strong>${chosenSubject}</strong> حالياً
+          <div style="font-size:11px;margin-top:6px;opacity:.7">سيتم إضافة مجموعات قريباً، تواصل مع الإدارة</div>
+        </div>`;
+      return;
+    }
+
+    // ===== عنوان القسم =====
+    const availableCount = Object.values(byGrade).flat().filter(g => !g.isFull).length;
+    container.insertAdjacentHTML('beforeend', `
+      <div style="text-align:center;font-size:13px;font-weight:700;color:var(--text-muted);
+        margin-bottom:14px;padding:8px 12px;background:#05060a;border-radius:8px;border:1px solid var(--border-color);">
+        <i class="fa-solid fa-filter" style="color:var(--accent-blue);margin-left:6px"></i>
+        مجموعات مادة <strong style="color:var(--text-main)">${chosenSubject}</strong>
+        — <strong style="color:var(--text-main)">${chosenGrade}</strong>
+        <span style="display:inline-block;margin-right:6px;background:rgba(59,130,246,0.12);
+          color:var(--accent-blue);border-radius:12px;padding:1px 8px;font-size:11px;">
+          ${availableCount} متاحة من ${totalGroups}
+        </span>
+      </div>
+    `);
+
+    // ===== ترتيب المراحل — الممتلئة آخر الكارتات =====
+    const orderedGrades = [
+      ...GRADE_ORDER.filter(g => byGrade[g]),
+      ...Object.keys(byGrade).filter(g => !GRADE_ORDER.includes(g))
+    ];
+
+    orderedGrades.forEach(grade => {
+      const groups    = byGrade[grade];
+      const iconClass = GRADE_ICONS[grade] || 'fa-solid fa-users';
+      groups.sort((a, b) => (a.isFull ? 1 : 0) - (b.isFull ? 1 : 0));
+
+      const sectionHtml = `
+        <div class="grade-section" style="margin-bottom:20px;">
+          <div class="grade-section-header">
+            <div class="grade-section-title"><i class="${iconClass}"></i>${grade}</div>
+            <div class="grade-section-count">${groups.length} مجموعة</div>
+          </div>
+          <div class="grade-groups-body">
+            <div class="groups-grid">
+              ${groups.map(g => buildGroupCard(g)).join('')}
+            </div>
+          </div>
+        </div>`;
+
+      container.insertAdjacentHTML('beforeend', sectionHtml);
+    });
+
+  } catch (err) {
+    spinner.style.display = 'none';
+    container.innerHTML = `
+      <div class="no-groups-msg">
+        <i class="fa-solid fa-wifi" style="font-size:24px;margin-bottom:8px;display:block;color:#ef4444"></i>
+        تعذّر جلب المجموعات، تحقق من الاتصال وأعد المحاولة
+      </div>`;
+    console.error(err);
+  }
+}
+
+// بناء HTML كارت المجموعة مع شريط الامتلاء
+function buildGroupCard(g) {
+  const isFull   = g.isFull           || false;
+  const capacity = g.capacity         || 0;
+  const current  = g.currentCount     || 0;
+  const fillPct  = g.fillPct          || 0;
+  // grade موحّد: يأخذ من normalizedGrade (اللي استخرجناه من stage أو grade)
+  const gradeLabel = g.normalizedGrade || g.stage || g.grade || 'عامة';
+
+  // الكلاس الخاص بلون شريط الامتلاء
+  const barClass = fillPct >= 100 ? 'high' : fillPct >= 70 ? 'mid' : 'low';
+  const lblClass = fillPct >= 100 ? 'full' : fillPct >= 70 ? 'warn' : '';
+
+  // ---- شريط الامتلاء (يظهر فقط لو في max/capacity محدد) ----
+  const capacityBarHtml = capacity > 0 ? `
+    <div class="capacity-bar-wrap">
+      <div class="capacity-bar-track">
+        <div class="capacity-bar-fill ${barClass}" style="width:${fillPct}%"></div>
+      </div>
+      <div class="capacity-label ${lblClass}">
+        <span>${isFull ? 'المجموعة ممتلئة' : `${current} / ${capacity} طالب`}</span>
+        <span>${fillPct}%</span>
+      </div>
+    </div>` : '';
+
+  // ---- بيانات إضافية من الداشبورد ----
+  const metaLines = [];
+  if (g.day)  metaLines.push(`<span><i class="fa-regular fa-calendar" style="margin-left:4px"></i>${g.day}</span>`);
+  if (g.time) metaLines.push(`<span><i class="fa-regular fa-clock" style="margin-left:4px"></i>${g.time}</span>`);
+  if (g.room) metaLines.push(`<span><i class="fa-solid fa-location-dot" style="margin-left:4px"></i>${g.room}</span>`);
+  const metaHtml = metaLines.length ? `<div class="group-card-meta">${metaLines.join('')}</div>` : '';
+
+  // ---- كارت ممتلئ ----
+  if (isFull) {
+    return `
+      <div class="group-card full-card" id="card_${g.key}">
+        <div class="full-badge"><i class="fa-solid fa-ban"></i> ممتلئة</div>
+        <div class="group-card-title">${g.title}</div>
+        ${metaHtml}
+        ${capacityBarHtml}
+      </div>`;
+  }
+
+  // ---- كارت متاح ----
+  return `
+    <div class="group-card" id="card_${g.key}"
+      onclick="toggleGroupSelection('${g.key}','${escapeAttr(g.title)}','${escapeAttr(gradeLabel)}')">
+      <div class="group-card-check"><i class="fa-solid fa-check"></i></div>
+      <div class="group-card-title">${g.title}</div>
+      ${metaHtml}
+      ${capacityBarHtml}
+    </div>`;
+}
+
+function escapeAttr(str) {
+  return (str || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+// ========== منطق الاختيار المتعدد (بحد أقصى 2) ==========
+function toggleGroupSelection(key, title, grade) {
+  const idx = studentForm.selectedGroups.findIndex(g => g.key === key);
+  const card = document.getElementById('card_' + key);
+
+  if (idx >= 0) {
+    // إلغاء الاختيار
+    studentForm.selectedGroups.splice(idx, 1);
+    card.classList.remove('selected');
+    // لو ماضيش اختيار، نرجع كل المجموعات
+    restoreGroupCards();
+  } else {
+    if (studentForm.selectedGroups.length >= 2) {
+      // أقصى 2 — رسالة تنبيه خفيفة
+      shakeCounter();
+      return;
+    }
+
+    // ===== التحقق من الأزواج لو في أزواج محددة =====
+    if (studentForm.selectedGroups.length === 1 && studentBundles.length > 0) {
+      const firstKey = studentForm.selectedGroups[0].key;
+      const isValidPair = studentBundles.some(b =>
+        (b.group1_id === firstKey && b.group2_id === key) ||
+        (b.group2_id === firstKey && b.group1_id === key)
+      );
+      if (!isValidPair) {
+        shakeCounter();
+        return; // الكارت مقيّد أصلاً — لكن كحماية إضافية
       }
     }
-    
-    if(!hasGroups) {
-      groupSelect.innerHTML = '<option value="default_group" data-title="المجموعة العامة لعام 2027">المجموعة العامة لعام 2027 (سيتم التحديد لاحقاً)</option>';
+
+    studentForm.selectedGroups.push({ key, title, grade });
+    card.classList.add('selected');
+
+    // لو أول اختيار وفيه أزواج — قيّد الكارتات التانية
+    if (studentForm.selectedGroups.length === 1 && studentBundles.length > 0) {
+      restrictToValidPairs(key);
+    }
+  }
+
+  updateSelectionUI();
+}
+
+// ===== تقييد الكارتات بناءً على الأزواج المسموح بها =====
+function restrictToValidPairs(selectedKey) {
+  if (studentBundles.length === 0) return;
+
+  const validPartners = new Set();
+  studentBundles.forEach(b => {
+    if (b.group1_id === selectedKey) validPartners.add(b.group2_id);
+    if (b.group2_id === selectedKey) validPartners.add(b.group1_id);
+  });
+
+  document.querySelectorAll('.group-card').forEach(card => {
+    const cardKey = card.id.replace('card_', '');
+    if (cardKey !== selectedKey && !validPartners.has(cardKey) && !card.classList.contains('full-card')) {
+      card.classList.add('bundle-disabled');
     }
   });
-});
+
+  // عرض التنبيه
+  const hint = document.getElementById('bundleHint');
+  if (hint) {
+    hint.classList.add('visible');
+    const count = validPartners.size;
+    document.getElementById('bundleHintText').textContent =
+      count > 0
+        ? `اختر المجموعة الثانية المتوافقة من المجموعات المتاحة (${count} ${count === 1 ? 'خيار' : 'خيارات'})`
+        : 'لا توجد مجموعة ثانية متوافقة مع اختيارك الحالي';
+  }
+}
+
+// ===== إرجاع كل الكارتات لحالتها الطبيعية =====
+function restoreGroupCards() {
+  document.querySelectorAll('.group-card').forEach(card => {
+    card.classList.remove('bundle-disabled');
+  });
+  const hint = document.getElementById('bundleHint');
+  if (hint) hint.classList.remove('visible');
+}
+
+function updateSelectionUI() {
+  const count   = studentForm.selectedGroups.length;
+  const counter = document.getElementById('selectionCounter');
+  const preview = document.getElementById('selectedPreview');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // عداد
+  counter.textContent = `${count} / 2`;
+  counter.className   = 'counter-value' + (count === 2 ? ' full' : '');
+
+  // تعطيل الكارتات غير المختارة لو وصلنا 2
+  document.querySelectorAll('.group-card').forEach(card => {
+    const cardKey = card.id.replace('card_', '');
+    const isSelected = studentForm.selectedGroups.some(g => g.key === cardKey);
+    if (count >= 2 && !isSelected) {
+      card.classList.add('disabled-card');
+    } else {
+      card.classList.remove('disabled-card');
+    }
+  });
+
+  // لو count = 0 نخلي كل الكارتات متاحة
+  if (count === 0) {
+    restoreGroupCards();
+  }
+
+  // معاينة الاختيارات
+  if (count > 0) {
+    preview.className = 'selected-groups-preview visible';
+    preview.innerHTML = studentForm.selectedGroups
+      .map(g => `<span class="selected-tag"><i class="fa-solid fa-check"></i>${g.title}</span>`)
+      .join('');
+  } else {
+    preview.className = 'selected-groups-preview';
+    preview.innerHTML = '';
+  }
+
+  // زر التأكيد: يُفعَّل لو اختار واحدة على الأقل
+  submitBtn.disabled = count === 0;
+}
+
+function shakeCounter() {
+  const counter = document.getElementById('selectionCounter');
+  counter.style.transition = 'none';
+  counter.style.transform  = 'scale(1.18)';
+  counter.style.color      = '#ef4444';
+  setTimeout(() => {
+    counter.style.transform = 'scale(1)';
+    counter.style.color     = '#10b981';
+    setTimeout(() => { counter.style.color = ''; }, 400);
+  }, 250);
+}
 
 // دالة تحديث الخطوات والعداد المرئي
 function changeStep(stepNumber) {
@@ -684,6 +1570,21 @@ function changeStep(stepNumber) {
       if (i !== 4) indicator.innerText = i;
     }
   }
+
+  // عند الوصول للخطوة 3: نحمّل المجموعات دايماً (مرتبطة بالمادة والمرحلة)
+  if (stepNumber === 3) {
+    // reset الاختيارات السابقة لو المادة أو المرحلة اتغيرت
+    studentForm.selectedGroups = [];
+    studentBundles = [];
+    updateSelectionUI();
+    // إخفاء تنبيه الربط
+    const hint = document.getElementById('bundleHint');
+    if (hint) hint.classList.remove('visible');
+    // إعادة تحميل كل مرة عشان المادة أو المرحلة ممكن اتغيرت
+    document.getElementById('groupsContainer').innerHTML = '';
+    document.getElementById('groupsLoadingSpinner').style.display = 'block';
+    loadAndRenderGroups();
+  }
 }
 
 function pickSubject(subjectName, element) {
@@ -695,8 +1596,8 @@ function pickSubject(subjectName, element) {
 
 // تعديل الدالة لتعمل بشكل غير متزامن وتفحص التكرار في قاعدة البيانات
 async function verifyStep2Data() {
-  studentForm.name = document.getElementById('studentName').value.trim();
-  studentForm.grade = document.getElementById('studentGrade').value;
+  studentForm.name   = document.getElementById('studentName').value.trim();
+  studentForm.grade  = document.getElementById('studentGrade').value;
   studentForm.sPhone = document.getElementById('studentPhone').value.trim();
   studentForm.pPhone = document.getElementById('parentPhone').value.trim();
 
@@ -715,8 +1616,6 @@ async function verifyStep2Data() {
 
   const btn = document.getElementById('btnStep2');
   const originalText = btn.innerHTML;
-  
-  // تغيير حالة الزر أثناء التحقق
   btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحقق من البيانات...';
   btn.disabled = true;
 
@@ -725,7 +1624,6 @@ async function verifyStep2Data() {
     if (directorySnap.exists()) {
       let isDuplicate = false;
       let errorMsg = "";
-
       directorySnap.forEach(child => {
         let studentData = child.val();
         if (studentData.name === studentForm.name) {
@@ -743,55 +1641,54 @@ async function verifyStep2Data() {
       if (isDuplicate) {
         alert(errorMsg);
         btn.innerHTML = originalText;
-        btn.disabled = false;
-        return; // إيقاف التنفيذ ومنع الانتقال للخطوة 3
+        btn.disabled  = false;
+        return;
       }
     }
   } catch (error) {
     console.error(error);
     alert("حدث خطأ أثناء محاولة الاتصال بقاعدة البيانات للتحقق. يرجى المحاولة مرة أخرى.");
     btn.innerHTML = originalText;
-    btn.disabled = false;
+    btn.disabled  = false;
     return;
   }
 
-  // إذا كانت البيانات غير متكررة، ارجع الزر لوضعه الطبيعي وانتقل للخطوة 3
   btn.innerHTML = originalText;
-  btn.disabled = false;
+  btn.disabled  = false;
   changeStep(3);
 }
 
 async function executeRegistration() {
-  const selectEl = document.getElementById('groupSelect');
-  if(!selectEl.value) {
-    alert("برجاء اختيار المجموعة التي ترغب بالانضمام إليها لحضور الحصص.");
+  if (studentForm.selectedGroups.length === 0) {
+    alert("برجاء اختيار مجموعة واحدة على الأقل.");
     return;
   }
-  
-  studentForm.groupKey = selectEl.value;
-  studentForm.groupTitle = selectEl.options[selectEl.selectedIndex].getAttribute('data-title');
 
-  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('submitBtn').style.display     = 'none';
   document.getElementById('loadingSpinner').style.display = 'block';
 
   try {
     let calculatedUid = 27001;
     const directorySnap = await database.ref('students_directory').once('value');
-    
-    if(directorySnap.exists()) {
+
+    if (directorySnap.exists()) {
       let maxCurrentUid = 0;
       directorySnap.forEach(child => {
         let currentUidInt = parseInt(child.val().uid);
-        if(!isNaN(currentUidInt) && currentUidInt > maxCurrentUid) {
+        if (!isNaN(currentUidInt) && currentUidInt > maxCurrentUid) {
           maxCurrentUid = currentUidInt;
         }
       });
-      if(maxCurrentUid >= 27000) {
-        calculatedUid = maxCurrentUid + 1;
-      }
+      if (maxCurrentUid >= 27000) calculatedUid = maxCurrentUid + 1;
     }
 
     const finalUidString = calculatedUid.toString();
+
+    // نبني مرجع المجموعات المختارة
+    const groupsRef = {};
+    studentForm.selectedGroups.forEach((g, i) => {
+      groupsRef['group_' + (i + 1)] = { key: g.key, title: g.title };
+    });
 
     const studentPayload = {
       uid: finalUidString,
@@ -799,27 +1696,44 @@ async function executeRegistration() {
       grade: studentForm.grade,
       student_phone: studentForm.sPhone,
       parent_phone: studentForm.pPhone,
-      subject_preference: studentForm.subject, 
-      group_reference: studentForm.groupKey,    
-      group_title: studentForm.groupTitle,
-      status: 'pending',                        
-      wallet_balance: 1,                        
+      subject_preference: studentForm.subject,
+      groups: groupsRef,
+      // للتوافق مع الكود القديم نحفظ أول مجموعة كـ group_reference
+      group_reference: studentForm.selectedGroups[0].key,
+      group_title: studentForm.selectedGroups[0].title,
+      status: 'active',
+      wallet_balance: 2,          // حصتان ترحيبيتان مجاناً
       registration_date: new Date().toISOString()
     };
 
     await database.ref('students_directory').push(studentPayload);
 
+    // إرسال إشعار للداشبورد
+    const groupsLabel = studentForm.selectedGroups.map(g => g.title).join(' و ');
+    await database.ref('notifications').push({
+      type: 'new_booking',
+      message: `حجز جديد: ${studentForm.name} (${finalUidString}) — ${studentForm.subject} — ${groupsLabel}`,
+      icon: 'fa-user-plus',
+      color: 'var(--em2, #34D399)',
+      read: false,
+      timestamp: Date.now()
+    });
+
     document.getElementById('loadingSpinner').style.display = 'none';
-    document.getElementById('confirmationText').innerHTML = `أهلاً بك يا <strong>${studentForm.name.split(' ')[0]}</strong>، تم إدراجك في مادة <strong>${studentForm.subject}</strong>.`;
+
+    const groupsText = studentForm.selectedGroups.map(g => `<strong>${g.title}</strong>`).join(' و ');
+    document.getElementById('confirmationText').innerHTML =
+      `أهلاً بك يا <strong>${studentForm.name.split(' ')[0]}</strong>، تم إدراجك في مادة <strong>${studentForm.subject}</strong> — ${groupsText}.`;
+
     document.getElementById('studentUidDisplay').innerText = finalUidString;
 
     new QRCode(document.getElementById("studentQrCode"), {
       text: finalUidString,
       width: 150,
       height: 150,
-      colorDark : "#020203",
-      colorLight : "#ffffff",
-      correctLevel : QRCode.CorrectLevel.H
+      colorDark:  "#020203",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
     });
 
     changeStep(4);
@@ -827,7 +1741,7 @@ async function executeRegistration() {
   } catch (error) {
     console.error(error);
     alert("عذراً، واجهنا مشكلة أثناء إتمام اتصال الحجز بقاعدة البيانات، يرجى المحاولة مرة أخرى.");
-    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('submitBtn').style.display      = 'block';
     document.getElementById('loadingSpinner').style.display = 'none';
   }
 }
@@ -835,19 +1749,19 @@ async function executeRegistration() {
 function downloadStudentQR() {
   const qrContainer = document.getElementById('studentQrCode');
   const canvas = qrContainer.querySelector('canvas');
-  const img = qrContainer.querySelector('img');
-  let dataUrl = '';
-  
+  const img    = qrContainer.querySelector('img');
+  let dataUrl  = '';
+
   if (canvas) {
     dataUrl = canvas.toDataURL('image/png');
   } else if (img) {
     dataUrl = img.src;
   }
-  
+
   if (dataUrl) {
     const downloadLink = document.createElement('a');
-    const studentUid = document.getElementById('studentUidDisplay').innerText || '2027';
-    downloadLink.href = dataUrl;
+    const studentUid   = document.getElementById('studentUidDisplay').innerText || '2027';
+    downloadLink.href     = dataUrl;
     downloadLink.download = `كود_حضور_طالب_${studentUid}.png`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
@@ -855,6 +1769,255 @@ function downloadStudentQR() {
   } else {
     alert("يرجى الانتظار لحين اكتمال إنشاء الكود أو أخذ لقطة شاشة يدوياً.");
   }
+}
+
+// ========== نظام التابات ==========
+function switchTab(tab) {
+  ['booking','swap','inquiry'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('section-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'swap') resetSwapForm();
+  if (tab === 'inquiry') {
+    document.getElementById('inquiryInput').value = '';
+    document.getElementById('inquiryResults').innerHTML = '';
+    document.getElementById('inquiryLoadingSpinner').style.display = 'none';
+  }
+}
+
+// ========== نظام طلب التبديل ==========
+let swapStudentData = null;
+let swapStudentFid  = null;
+let allGroupsData   = {};
+
+async function lookupStudentForSwap() {
+  const uid = document.getElementById('swapUid').value.trim();
+  if (!uid) { alert('برجاء إدخال رقم الطالب (UID).'); return; }
+
+  const btn = document.querySelector('#swapStep1 .action-btn');
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري البحث...';
+  btn.disabled = true;
+
+  try {
+    const [studentsSnap, groupsSnap] = await Promise.all([
+      database.ref('students_directory').once('value'),
+      database.ref('app_configurations/groups').once('value')
+    ]);
+
+    allGroupsData = groupsSnap.val() || {};
+    let found = null, foundFid = null;
+    studentsSnap.forEach(child => {
+      if (String(child.val().uid) === String(uid)) {
+        found = child.val();
+        foundFid = child.key;
+      }
+    });
+
+    if (!found) {
+      alert('لم يتم العثور على طالب بهذا الرقم، تأكد من الرقم وأعد المحاولة.');
+      btn.innerHTML = '<i class="fa-solid fa-search"></i> بحث عن بياناتي';
+      btn.disabled = false;
+      return;
+    }
+
+    swapStudentData = found;
+    swapStudentFid  = foundFid;
+
+    // عرض بيانات الطالب
+    document.getElementById('swapStudentName').textContent = found.name;
+    const g1Title = found.group_title  || (allGroupsData[found.group_reference]?.title) || '—';
+    const g2Title = found.group_title_2 || (found.groups?.group_2 ? (allGroupsData[found.groups.group_2.key]?.title || found.groups.group_2.title) : null);
+    let metaHtml = `المرحلة: <span>${found.grade || '—'}</span> • المادة: <span>${found.subject_preference || '—'}</span><br>`;
+    metaHtml += `المجموعة الأولى: <span>${g1Title}</span>`;
+    if (g2Title) metaHtml += ` • المجموعة الثانية: <span>${g2Title}</span>`;
+    document.getElementById('swapStudentMeta').innerHTML = metaHtml;
+    document.getElementById('swapStudentInfo').classList.add('visible');
+
+    // ملء قائمة "من مجموعة" بمجموعات الطالب فقط
+    const fromSel = document.getElementById('swapFromGroup');
+    fromSel.innerHTML = '<option value="">— اختر المجموعة التي تريد التبديل منها —</option>';
+    const ref1Key   = found.group_reference;
+    const ref1Title = g1Title;
+    if (ref1Key) fromSel.innerHTML += `<option value="${ref1Key}|1">${ref1Title} (الأولى)</option>`;
+    if (g2Title) {
+      const ref2Key = found.group_reference_2 || found.groups?.group_2?.key;
+      if (ref2Key) fromSel.innerHTML += `<option value="${ref2Key}|2">${g2Title} (الثانية)</option>`;
+    }
+
+    // ملء قائمة "إلى مجموعة" بكل المجموعات ما عدا اللي الطالب فيها
+    const toSel = document.getElementById('swapToGroup');
+    const studentGroupKeys = [found.group_reference, found.group_reference_2, found.groups?.group_2?.key].filter(Boolean);
+    toSel.innerHTML = '<option value="">— اختر المجموعة الجديدة —</option>';
+    for (const [gid, g] of Object.entries(allGroupsData)) {
+      if (!studentGroupKeys.includes(gid)) {
+        toSel.innerHTML += `<option value="${gid}">${g.title}${g.day ? ' — ' + g.day : ''}${g.time ? ' ' + g.time : ''}</option>`;
+      }
+    }
+
+    document.getElementById('swapStep2').style.display = 'block';
+    btn.innerHTML = '<i class="fa-solid fa-search"></i> بحث عن بياناتي';
+    btn.disabled = false;
+
+  } catch (err) {
+    console.error(err);
+    alert('حدث خطأ أثناء البحث، تحقق من الاتصال وأعد المحاولة.');
+    btn.innerHTML = '<i class="fa-solid fa-search"></i> بحث عن بياناتي';
+    btn.disabled = false;
+  }
+}
+
+async function submitSwapRequest() {
+  const fromVal  = document.getElementById('swapFromGroup').value;
+  const toKey    = document.getElementById('swapToGroup').value;
+  const reason   = document.getElementById('swapReason').value.trim();
+
+  if (!fromVal) { alert('برجاء اختيار المجموعة التي تريد التبديل منها.'); return; }
+  if (!toKey)   { alert('برجاء اختيار المجموعة الجديدة.'); return; }
+  if (!reason)  { alert('برجاء كتابة سبب التبديل.'); return; }
+
+  const [fromKey, fromSlot] = fromVal.split('|');
+  const fromTitle = document.getElementById('swapFromGroup').selectedOptions[0].text;
+  const toTitle   = document.getElementById('swapToGroup').selectedOptions[0].text;
+
+  document.getElementById('swapSubmitBtn').style.display = 'none';
+  document.getElementById('swapLoadingSpinner').style.display = 'block';
+
+  try {
+    // حساب رقم الطلب التالي SW-XXXX
+    const swapSnap = await database.ref('swap_requests').once('value');
+    const swapCount = swapSnap.exists() ? Object.keys(swapSnap.val()).length : 0;
+    const swapNum   = 'SW-' + String(swapCount + 1).padStart(4, '0');
+
+    const payload = {
+      request_number : swapNum,
+      student_uid    : swapStudentData.uid,
+      student_fid    : swapStudentFid,
+      student_name   : swapStudentData.name,
+      student_phone  : swapStudentData.student_phone || '',
+      parent_phone   : swapStudentData.parent_phone  || '',
+      from_group_key : fromKey,
+      from_group_title: fromTitle.replace(' (الأولى)','').replace(' (الثانية)',''),
+      from_slot      : fromSlot,   // '1' أو '2'
+      to_group_key   : toKey,
+      to_group_title : toTitle,
+      reason         : reason,
+      status         : 'pending',
+      timestamp      : Date.now()
+    };
+
+    await database.ref('swap_requests').push(payload);
+
+    // إشعار الداشبورد
+    await database.ref('notifications').push({
+      type     : 'swap_request',
+      message  : `طلب تبديل جديد: ${swapStudentData.name} (${swapStudentData.uid}) — من ${payload.from_group_title} إلى ${toTitle}`,
+      icon     : 'fa-right-left',
+      color    : '#f59e0b',
+      read     : false,
+      timestamp: Date.now()
+    });
+
+    document.getElementById('swapLoadingSpinner').style.display = 'none';
+    document.getElementById('swapStep1').style.display    = 'none';
+    document.getElementById('swapStep2').style.display    = 'none';
+    document.getElementById('swapStudentInfo').classList.remove('visible');
+    document.getElementById('swapTicketNum').textContent  = swapNum;
+    document.getElementById('swapSuccessBox').style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    alert('حدث خطأ أثناء إرسال الطلب، تحقق من الاتصال وأعد المحاولة.');
+    document.getElementById('swapSubmitBtn').style.display   = 'block';
+    document.getElementById('swapLoadingSpinner').style.display = 'none';
+  }
+}
+
+function resetSwapForm() {
+  swapStudentData = null;
+  swapStudentFid  = null;
+  document.getElementById('swapUid').value = '';
+  document.getElementById('swapReason').value = '';
+  document.getElementById('swapStudentInfo').classList.remove('visible');
+  document.getElementById('swapStep1').style.display    = 'block';
+  document.getElementById('swapStep2').style.display    = 'none';
+  document.getElementById('swapSuccessBox').style.display = 'none';
+  document.getElementById('swapSubmitBtn').style.display   = 'block';
+  document.getElementById('swapLoadingSpinner').style.display = 'none';
+}
+
+// ========== نظام الاستعلام ==========
+async function doInquiry() {
+  const val = document.getElementById('inquiryInput').value.trim();
+  if (!val) { alert('برجاء إدخال رقم الطلب أو الـ UID.'); return; }
+
+  const spinner = document.getElementById('inquiryLoadingSpinner');
+  const results = document.getElementById('inquiryResults');
+  spinner.style.display = 'block';
+  results.innerHTML = '';
+
+  try {
+    const snap = await database.ref('swap_requests').once('value');
+    const all  = snap.val() || {};
+    let matches = [];
+
+    if (val.toUpperCase().startsWith('SW-')) {
+      // بحث برقم الطلب
+      matches = Object.values(all).filter(r => r.request_number === val.toUpperCase());
+    } else {
+      // بحث بالـ UID
+      matches = Object.values(all).filter(r => String(r.student_uid) === String(val));
+    }
+
+    spinner.style.display = 'none';
+
+    if (!matches.length) {
+      results.innerHTML = `
+        <div style="text-align:center;padding:24px 0;color:var(--text-muted);font-size:13px;font-weight:700">
+          <i class="fa-solid fa-circle-xmark" style="font-size:28px;display:block;margin-bottom:10px;color:#ef4444"></i>
+          لم يتم العثور على أي طلبات بهذا الرقم
+        </div>`;
+      return;
+    }
+
+    // ترتيب من الأحدث للأقدم
+    matches.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    results.innerHTML = matches.map(r => buildInquiryCard(r)).join('');
+
+  } catch (err) {
+    console.error(err);
+    spinner.style.display = 'none';
+    results.innerHTML = `<div style="text-align:center;color:#ef4444;font-size:13px;font-weight:700;padding:16px">حدث خطأ، تحقق من الاتصال وأعد المحاولة.</div>`;
+  }
+}
+
+function buildInquiryCard(r) {
+  const statusMap = {
+    pending  : { cls: 'pending',  icon: 'fa-clock',       label: 'قيد المراجعة' },
+    approved : { cls: 'approved', icon: 'fa-circle-check', label: 'تم القبول'    },
+    rejected : { cls: 'rejected', icon: 'fa-circle-xmark', label: 'مرفوض'        }
+  };
+  const st = statusMap[r.status] || statusMap['pending'];
+  const dateStr = r.timestamp ? new Date(r.timestamp).toLocaleDateString('ar-EG', { day:'numeric', month:'short', year:'numeric' }) : '—';
+
+  return `
+    <div class="inquiry-status-box visible ${st.cls}" style="margin-bottom:14px;text-align:right">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="inquiry-status-icon" style="font-size:22px;margin:0"><i class="fa-solid ${st.icon}"></i></div>
+        <div>
+          <div class="inquiry-status-title" style="font-size:14px">${r.request_number}</div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600">${dateStr}</div>
+        </div>
+      </div>
+      <div class="inquiry-status-detail">
+        الطالب: <strong style="color:var(--text-main)">${r.student_name}</strong><br>
+        من: <strong style="color:var(--text-main)">${r.from_group_title}</strong>
+        &nbsp;←&nbsp;
+        إلى: <strong style="color:var(--text-main)">${r.to_group_title}</strong><br>
+        السبب: ${r.reason}<br>
+        الحالة: <strong>${st.label}</strong>
+        ${r.reject_reason ? `<br>سبب الرفض: <span style="color:#ef4444">${r.reject_reason}</span>` : ''}
+      </div>
+    </div>`;
 }
 </script>
 </body>
